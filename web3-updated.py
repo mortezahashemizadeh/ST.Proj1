@@ -12,21 +12,11 @@ option.add_argument('headless')
 driver = webdriver.Chrome(options=option)
 site=driver.get("https://www.digikala.com/search/?q=دوچرخه")
 
-# scrolling down
-while True :
-    ActionChains(driver).send_keys(Keys.PAGE_UP)
-    ActionChains(driver).send_keys(Keys.PAGE_UP)
-    element = driver.find_elements(By.CSS_SELECTOR,'.product-list_ProductList__item__LiiNI')
-    if len (element) < 50 :
-        try :          
-            footer = driver.find_element(By.TAG_NAME, 'footer')
-            ActionChains(driver).scroll_to_element(footer).perform()
-        except:
-            print("Scrolling Done.")
-            
-            time.sleep(2.5)
-    else:
-         break
-    
-element = driver.find_elements(By.CSS_SELECTOR,'.product-list_ProductList__item__LiiNI')
-print (len (element))
+time.sleep(5)
+i,k=0,500
+while len(driver.find_elements(By.CSS_SELECTOR,'.product-list_ProductList__item__LiiNI'))<80:  #For Scroll and load page for get complete data.
+    i+=500
+    k+=500
+    time.sleep(0.1)
+    driver.execute_script("window.scrollTo({},{});".format(i,k))
+    time.sleep(0.5)
