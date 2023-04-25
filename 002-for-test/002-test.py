@@ -54,11 +54,11 @@ data = html.Div()
 
 def updates(n_clicks,value):
     content=[]
-    url = "https://www.digikala.com/search/?q={}".format(value)
     if n_clicks > 0: 
+        url = "https://www.digikala.com/search/?q={}".format(value)
         site=driver.get(url)
         def notfound():
-            time.sleep(1) 
+            time.sleep(2) 
             '''
             Check the product list after search and load page
             If product dont found after search return True
@@ -71,7 +71,6 @@ def updates(n_clicks,value):
             content=[]
             content.append(html.Center(children='کالایی با این مشخصات پیدا نکردیم',style={'text-align':'center','color':'green','font-size':'14px'}))
             content.append(html.Center(children='پیشنهاد می‌کنیم کلید واژه جستجو را تغییر دهید',style={'text-align':'center','color':'black','font-size':'12px'}))
-            return content,n_clicks
         if check != True:
             content=[]
         #........................................................................................................#
@@ -81,8 +80,9 @@ def updates(n_clicks,value):
                 while len(driver.find_elements(By.CSS_SELECTOR,'.product-list_ProductList__item__LiiNI'))<80:  #For Scroll and load page for get complete data.
                     i+=500
                     k+=500
-                    time.sleep(0.5)
+                    time.sleep(0.7)
                     driver.execute_script("window.scrollTo({},{});".format(i,k))
+                    time.sleep(0.1)
             scroll()
             #........................................................................................................#
             time.sleep(1)
@@ -180,7 +180,8 @@ def updates(n_clicks,value):
                 )
                 
             )
-            return content,n_clicks
+        n_clicks = 0
+        return content,n_clicks
 
 app.layout=html.Center([
     html.Center(children=[header,searcht,warn,searchbox],className='text-center'),
