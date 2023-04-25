@@ -9,6 +9,8 @@ import plotly.express as px
 import time
 import csv
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from plotly.tools import mpl_to_plotly
 
@@ -22,7 +24,10 @@ def numberdecode(number):
     from unidecode import unidecode 
     return int(unidecode(number)) ### english number
 
-
+option = webdriver.ChromeOptions()
+option.add_argument('headless')
+option.add_experimental_option("detach", True)
+driver = webdriver.Chrome(options=option)
 
 
 app = Dash(__name__,external_stylesheets=[dbc.themes.ZEPHYR])
@@ -49,12 +54,9 @@ data = html.Div()
 
 def updates(n_clicks,value):
     content=[]
+    url = "https://www.digikala.com/search/?q={}".format(value)
     if n_clicks > 0: 
-        option = webdriver.ChromeOptions()
-        option.add_argument('headless')
-        option.add_experimental_option("detach", True)
-        driver = webdriver.Chrome(options=option)
-        site=driver.get("https://www.digikala.com/search/?q={}".format(value))
+        site=driver.get(url)
         def notfound():
             time.sleep(1) 
             '''
@@ -206,4 +208,4 @@ app.layout=html.Center([
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(port=313)
