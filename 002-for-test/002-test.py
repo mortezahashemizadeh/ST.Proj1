@@ -1,11 +1,13 @@
-from dash import Dash,dcc,html,callback,Output,Input,dcc,dash_table,State
-import pandas as pd 
+'''
+Salam 
+In Code Pythoni Bra Search Dar SearchBox Site Digikala.ir Neveshteh Shode Ast.
+Barnameh Dar Link :http://127.0.0.1:313 , Run Misheh
+Link Ro Baz Koinid.
+'''
+from dash import Dash,dcc,html,callback,Output,Input,dcc,dash_table
 import dash_bootstrap_components as dbc
 from selenium import webdriver
 from selenium.webdriver.common.by import By 
-from selenium.webdriver.common.keys import Keys 
-from selenium.webdriver.chrome.options import Options  # for suppressing the browser
-import plotly.express as px
 import time
 import csv
 import pandas as pd
@@ -13,6 +15,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from plotly.tools import mpl_to_plotly
+
 
 def numberdecode(number):
     '''
@@ -23,6 +26,32 @@ def numberdecode(number):
     number=number.replace(',','') ### replace ',' to '' so remove ',' from str
     from unidecode import unidecode 
     return int(unidecode(number)) ### english number
+
+
+def notfound():
+        time.sleep(2) 
+        '''
+        Check the product list after search and load page
+        If product dont found after search return True
+        '''
+        element=driver.find_elements(By.CSS_SELECTOR,".product-list_ProductList__emptyWrapper__Hh8Ij")
+        if len(element)==1:
+            return True
+
+
+def scroll():
+    '''
+    scroll page for get and load data from server.
+    '''
+    time.sleep(1)
+    i,k=0,500
+    while len(driver.find_elements(By.CSS_SELECTOR,'.product-list_ProductList__item__LiiNI'))<80:  #For Scroll and load page for get complete data.
+        i+=500
+        k+=500
+        time.sleep(0.6)
+        driver.execute_script("window.scrollTo({},{});".format(i,k))
+        time.sleep(0.2)
+
 
 option = webdriver.ChromeOptions()
 option.add_argument('headless')
@@ -43,7 +72,7 @@ section = html.Section(style={'height':'5px'})
 
 
 data = html.Div()
-#footer= dbc.CardFooter(children='این نرم افزار با پایتون طراحی شده است',style={'text-align':'center','color':'green','size':'16px','margin':'auto','background-color':'grean'})
+
 
 @callback(
     Output(data,component_property='children'),
@@ -57,58 +86,40 @@ def updates(n_clicks,value):
     if n_clicks > 0: 
         url = "https://www.digikala.com/search/?q={}".format(value)
         site=driver.get(url)
-        def notfound():
-            time.sleep(2) 
-            '''
-            Check the product list after search and load page
-            If product dont found after search return True
-            '''
-            element=driver.find_elements(By.CSS_SELECTOR,".product-list_ProductList__emptyWrapper__Hh8Ij")
-            if len(element)==1:
-                return True
+
         check= notfound()
         if check == True:
             content=[]
-            content.append(html.Center(children='کالایی با این مشخصات پیدا نکردیم',style={'text-align':'center','color':'green','font-size':'14px'}))
+            content.append(html.Center(children='عزیزجان،کالایی با این مشخصات پیدا نکردیم',style={'text-align':'center','color':'green','font-size':'14px'}))
             content.append(html.Center(children='پیشنهاد می‌کنیم کلید واژه جستجو را تغییر دهید',style={'text-align':'center','color':'black','font-size':'12px'}))
         if check != True:
             content=[]
         #........................................................................................................#
-            def scroll():
-                time.sleep(2)
-                i,k=0,500
-                while len(driver.find_elements(By.CSS_SELECTOR,'.product-list_ProductList__item__LiiNI'))<80:  #For Scroll and load page for get complete data.
-                    i+=500
-                    k+=500
-                    time.sleep(0.7)
-                    driver.execute_script("window.scrollTo({},{});".format(i,k))
-                    time.sleep(0.1)
             scroll()
-            #........................................................................................................#
-            time.sleep(1)
+        #........................................................................................................#
+            time.sleep(0.5)
             elements=driver.find_elements(By.CSS_SELECTOR,'.product-list_ProductList__item__LiiNI')
-
             data=list()
             index=1
             for element in elements[0:50]:
                 datadic=dict()
-                #--------------------------------------------------------------------------------------------------------------#find index and name 
+        #--------------------------------------------------------------------------------------------------------------#find index and name 
               ##  index=element.get_attribute('data-product-index')             bug                                    # get data-product-index from each elements
                 title=element.find_element(By.TAG_NAME,'a')                                                       #find a tag name from each elements
                 name= title.find_element(By.TAG_NAME,'h3').get_attribute('innerHTML')                             # find h3 tag_name  then get inner html from each "a"
                 
             
-            #--------------------------------------------------------------------------------------------------------------#Find Image Link
+        #--------------------------------------------------------------------------------------------------------------#Find Image Link
                 imgname = element.find_element(By.TAG_NAME,'picture').find_element(By.TAG_NAME,'img')             #
                 linkimage=imgname.get_attribute('data-src')
-            #--------------------------------------------------------------------------------------------------------------#Find Price
+        #--------------------------------------------------------------------------------------------------------------#Find Price
                 price_el=element.find_element(By.CSS_SELECTOR,".d-flex.ai-center.jc-end.gap-1.color-700.color-400.text-h5.grow-1").find_element(By.TAG_NAME,'span')
                 price=price_el.get_attribute('innerHTML')
-            #--------------------------------------------------------------------------------------------------------------# Find Link
+        #--------------------------------------------------------------------------------------------------------------# Find Link
                 link = element.find_element(By.TAG_NAME,'a').get_attribute('href')
 
 
-            #--------------------------------------------------------------------------------------------------------------# WRITE Data in dict then append to mother list
+        #--------------------------------------------------------------------------------------------------------------# WRITE Data in dict then append to mother list
                 ####add each data to dict 
                 datadic['index']=index
                 datadic['name']=name
@@ -118,7 +129,7 @@ def updates(n_clicks,value):
                 datadic['img']="<img src='{}' height='100' />".format(linkimage)
                 data.append(datadic)
                 index+=1
-            #........................................................................................................#
+        #........................................................................................................#
 
 
             # WRITE DATA in csv format
@@ -129,6 +140,9 @@ def updates(n_clicks,value):
                 writer.writeheader()
                 for i in data:
                         writer.writerow(i)
+            #........................................................................................................#
+            # Read data in csv formate , create table and chart. 
+
             df = pd.read_csv('data.csv')
             content.append(html.Center([
             dash_table.DataTable(
@@ -140,9 +154,9 @@ def updates(n_clicks,value):
             columns=[
             {'id':'prolink','name':'لینک مستقیم',"presentation": "markdown"},
             {'id':'img','name':'تصویر',"presentation": "markdown"},
-            {'id':'price','name':"قیمت تومان"},
+            {'id':'price','name':"(قیمت)تومان"},
             {'id':'name' , 'name':'نام محصول'},
-            {'id':'index','name':''},
+            {'id':'index','name':'شماره'},
     ],
             
             markdown_options={"html": True,"link_target":"_self"},
@@ -152,6 +166,7 @@ def updates(n_clicks,value):
             style_header={
                 'backgroundColor': 'green',
                 'border': '0.5px solid black' ,
+                'font_size': '12px',
                 'color':'white'
             },
             style_data={
@@ -167,13 +182,15 @@ def updates(n_clicks,value):
                 'padding-left': '20px',
             }
             )])),
+            # TO DO create chart with matplotlib
             fig,ax1 = plt.subplots()
             ax1.plot(df['index'],df['price'],color='green',linewidth=1)
             ax1.set_xlabel('شماره محصول', color='green')
-            ax1.set_ylabel('قیمت تومان', color='green')
+            ax1.set_ylabel("(قیمت)تومان", color='green')
             ax1.tick_params(labelcolor='tab:green')
-            ax1.set_facecolor('white')
+            ax1.grid(color='black', linestyle='--', linewidth=0.5)
             plotly_fig = mpl_to_plotly(fig)
+
             content.append(
                 html.Center(
                 dcc.Graph(figure=plotly_fig,style={'width': '150vh', 'height': '150vh'})
@@ -191,22 +208,13 @@ app.layout=html.Center([
 
 ])   
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
     app.run_server(port=313)
+
+'''
+Team Members :
+            Morteza Hashemizade 
+            Shima Beiranvand
+            Mohamamd Najafi
+
+'''
